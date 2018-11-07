@@ -1,8 +1,15 @@
 /*
-    DESCRIPTION
+    This is a project than use the OpenCV library.
+    The objective is identifier on a image the dice amount
+    and the sum of this.
 */
+
+/**
+ * @author Camilo Andres Montenegro C.
+ */
+
 package finalproject;
-//LIBRARIES
+//OpenCV Libraries used
 import static java.awt.Color.white;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,37 +30,38 @@ import org.opencv.imgproc.Imgproc;
 import static org.opencv.imgproc.Imgproc.CV_HOUGH_GRADIENT;
 import static org.opencv.imgproc.Imgproc.HOUGH_GRADIENT;
 import static org.opencv.imgproc.Imgproc.HoughCircles;
-//MAIN CLASS
+
+//Main class
 public class FinalProject {
     static int erSize = 5;
     static int diSize = 5;
     static int count = 0;
     
     public static void main(String... args) {
+        //Load image
         Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\Captura.JPG");
-        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\Dice.PNG");
-        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\Dados.JPG");
         
-        //GRAY SCALE
+        
+        //Gray scale converting
         Mat gray = new Mat(img.rows(), img.cols(), img.type());
         Imgproc.cvtColor(img, gray, Imgproc.COLOR_BGR2GRAY);
         
         
-        //EQUIALIZE IMAGE
+        //Equalize image
         Mat Equ = new Mat(img.rows(), img.cols(), img.type());
         
         
-        //APPLY NOISE FILTER
+        //Noise filter apply
         Mat filter = new Mat(img.rows(), img.cols(), img.type());
         Imgproc.medianBlur(gray, filter, 17);//17
         
 
-        //FIND BORDERS
+        //Find edges
         Mat canny = new Mat(img.rows(), img.cols(), img.type());
         Imgproc.Canny(filter, canny, 190, 190);//100, 100
         
         
-        //DETECT CIRCLES
+        //Detect Circles
         Mat circles = new Mat();
         Imgproc.HoughCircles(filter, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double)gray.rows()/24, 120.0, 20.0, 1, 30);
         for (int x = 0; x < circles.cols(); x++) {
@@ -63,13 +71,6 @@ public class FinalProject {
             int radius = (int) Math.round(c[2]);
             Imgproc.circle(canny, center, radius, new Scalar(255,0,255), 3, 8, 0);
         }
-        
-        
-        Mat erode = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
-        Mat dilate = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(canny, canny, dilate);
-        Imgproc.dilate(canny, canny, dilate);
-        Imgproc.erode(canny, canny, erode);
         
         
         //DETECT SQUARES
@@ -92,4 +93,4 @@ public class FinalProject {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
     
-}//END MAIN CLASS
+}//End main class
