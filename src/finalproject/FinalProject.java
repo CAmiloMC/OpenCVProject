@@ -8,7 +8,9 @@
  * @author Camilo Andres Montenegro C.
  */
 
+//Package
 package finalproject;
+
 //OpenCV Libraries used
 import static java.awt.Color.white;
 import java.util.ArrayList;
@@ -33,13 +35,25 @@ import static org.opencv.imgproc.Imgproc.HoughCircles;
 
 //Main class
 public class FinalProject {
-    static int erSize = 5;
-    static int diSize = 5;
-    static int count = 0;
+    static int erSize = 4;
+    static double resize = 0;
     
     public static void main(String... args) {
         //Load image
-        Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\Captura.JPG");
+        Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d0.JPG");
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d1.PNG");
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d2.PNG");
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d3.PNG");
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d4.PNG");//FALTA
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d5.PNG");
+        //Mat img = Imgcodecs.imread("D:\\Materias\\Procesamiento de imagenes\\Proyecto\\d6.PNG");
+        
+        
+        //Verify sizes
+        if((img.cols() + img.rows()) < 4000 && (img.cols() + img.rows()) > 2000)
+            Imgproc.resize(img, img, new Size(1302,781));
+        if(img.cols() > 927 && img.rows() > 879)
+            Imgproc.resize(img, img, new Size(528,840));
         
         
         //Gray scale converting
@@ -48,22 +62,27 @@ public class FinalProject {
         
         
         //Equalize image
-        Mat Equ = new Mat(img.rows(), img.cols(), img.type());
+        //Mat Equ = new Mat(img.rows(), img.cols(), img.type());
         
         
         //Noise filter apply
         Mat filter = new Mat(img.rows(), img.cols(), img.type());
-        Imgproc.medianBlur(gray, filter, 17);//17
+        Imgproc.medianBlur(gray, filter, 21);
         
-
+        
         //Find edges
         Mat canny = new Mat(img.rows(), img.cols(), img.type());
-        Imgproc.Canny(filter, canny, 190, 190);//100, 100
+        Imgproc.Canny(filter, canny, 180, 180);
         
+        
+        //Morphology
+        Mat element1 = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2*erSize + 1, 2*erSize + 1));
+        Imgproc.dilate(canny, canny, element1);
+
         
         //Detect Circles
         Mat circles = new Mat();
-        Imgproc.HoughCircles(filter, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double)gray.rows()/24, 120.0, 20.0, 1, 30);
+        Imgproc.HoughCircles(filter, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double)gray.rows()/24, 120, 20, 1, 40);
         for (int x = 0; x < circles.cols(); x++) {
             double[] c = circles.get(0, x);
             Point center = new Point(Math.round(c[0]), Math.round(c[1]));
@@ -73,17 +92,19 @@ public class FinalProject {
         }
         
         
-        //DETECT SQUARES
+        //Detect contourns
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(canny, contours, new  Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         
         
+        //Display results
+        int sums = circles.cols();
+        int dice = contours.size();
+        System.out.println("Sum of values: " + sums);
+        System.out.println("Number of dice: " + dice);
         
-        //DISPLAY RESULTS
-        System.out.println("Sum of the dice: " + circles.cols());
-        System.out.println("Amount of dice: " + contours.size()/10);
         
-        
-        //SHOW RESULTS
+        //Show results
         HighGui.imshow("Image", canny);
         HighGui.waitKey();
         System.exit(0);
